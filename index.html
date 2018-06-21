@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" charset="utf-8">
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" >
+
+		<title></title>
+
+		<link rel="stylesheet" type="text/css" href="css/index.css" />
+		<link rel="stylesheet" type="text/css" href="css/styles.css" />
+	</head>
+
+	<body>
+		<script type="text/javascript" src="js/index.js"></script>
+		<script type="text/javascript" src="js/methods.js"></script>
+		<script type="text/javascript" src="js/constants.js"></script>
+		<script type="text/javascript" src="js/elements.js"></script>
+		<script type="text/javascript" src="js/init.js"></script>
+		
+		<div id="container" class="container">
+			<div class="left-sidebar">
+				<input type="text" onkeydown="searchElement()" id="element_search" placeholder="Search for elements here...">
+
+				<h2>Results</h2>
+
+				<div class="search_results" id="search_results">
+				</div>
+
+				<h2 onclick="toggleLayersTab(this)">Layers</h2>
+
+				<div id="layers" class="search_results">
+				</div>
+			</div>
+
+			<div class="main" id="view">
+				<div id="viewbox">
+
+				</div>
+			</div>
+
+			<div class="left-sidebar right-sidebar">
+				<h1  onclick="switchBackgroundColor()">Properties</h1>
+				
+				<br><br>
+				
+				<div id="attributes_panel">
+
+				</div>
+			</div>
+
+		</div>
+
+		<div id="shade">
+		</div>
+
+		<div id="modal">
+			<h3 id="modal_head">Indicators</h3>
+			<hr>
+
+			<div id="modal_body">
+				<!--javascipts populates here-->
+			</div>
+
+			<div class="modal-base">
+				<hr>
+				<button onclick="updateIndicators()">Ok</button>
+			</div>
+		</div>
+
+		<div id="preview">
+		</div>
+
+		<script type="text/javascript">
+			const _colors = ["grey", "black", "white", "red", "blue", "green"];
+
+			//instaces
+			var _layers = {
+				0:{
+					"element": "div",
+					"attributes": {
+						"class": "main",
+						"id": "main",
+						"style": "height:100%;width:100%"
+					},
+					"parentNode": null,
+					"childNode": null,
+					"previousNode": null,
+					"nextNode": null,
+					"content": ""
+				}
+			};
+			var _current_layer_index = 0;
+			var _bgci = 0	//holds the variable for the bg color changing
+			var _properties_tab = 0	//not in advance mode
+			var _css_classes = {}
+			var _current_css_class = 0
+
+			//instantiaate necessary global variables
+			var container = document.getElementById("container");
+			
+			var element_search = document.getElementById("element_search");
+			var search_results = document.getElementById("search_results");
+			var layers = document.getElementById("layers");
+			
+
+			var view = document.getElementById("view");
+			var viewbox = document.getElementById("viewbox");
+			var properties_btn = document.getElementById("properties_btn");
+			var attributes_panel = document.getElementById("attributes_panel");
+			
+			var modal = document.getElementById("modal");
+			var modal_head = document.getElementById("modal_head");
+			var modal_body = document.getElementById("modal_body");
+			
+			var shade = document.getElementById("shade");
+			
+			var preview = document.getElementById("preview");
+			
+
+			// _layers = JSON.parse('')
+			
+			//set height to full
+			const height_scale = 0.857;
+			const width_scale = 0.999;
+			container.style.height = (height_scale*screen.availHeight).toString()+"px";
+			viewbox.style.height = (height_scale*screen.availHeight).toString()+"px";
+			shade.style.height = (0.8915*screen.availHeight).toString()+"px";
+			preview.style.height = (0.8915*screen.availHeight).toString()+"px";
+			
+			shade.style.width = (width_scale*screen.availWidth).toString()+"px";
+			preview.style.width = (width_scale*screen.availWidth).toString()+"px";
+			container.style.width = (width_scale*screen.availWidth).toString()+"px";
+			
+			window.addEventListener("keydown", function(evt){
+				evt = evt || window.event;
+				if((evt.keyCode == 27 || evt.keyCode == 27)){
+					//when ESC is pressed, exit the preview and show the view box
+					hideShade();
+					hidePreview();
+					renderViewbox();
+
+				}else if((evt.keyCode == 38 || evt.keyCode == 38) && evt.ctrlKey){
+					//push U to move layer up
+					moveCurrentLayer("up");
+				
+				}else if((evt.keyCode == 40 || evt.keyCode == 40) && evt.ctrlKey){
+					//push D to move layer down
+					moveCurrentLayer("down");
+				
+				}else if((evt.keyCode == 46 || evt.keyCode == 46)){
+					//push DELETE, delete layer
+					deleteCurrentLayer();
+				
+				}
+			});
+
+
+			__init__();
+		</script>
+	</body>
+</html>
