@@ -37,6 +37,7 @@ function createClass(){
 	_css_classes[cls] = new Object();
 	_current_css_class = cls;
 	showStyles();
+	showStyleAttributes();
 }
 
 function deleteCurrentLayer(){
@@ -354,6 +355,8 @@ function showAttributes(){
 	attributes = cl["attributes"];
 	basic_attributes = cl["basic-attributes"];
 
+	attributes_title.innerHTML = cl["attributes"]["id"];
+
 	prop = '';
 	if(_properties_tab == 1){
 		prop = "Show Basic";
@@ -428,6 +431,7 @@ function showAttributes(){
 
 }
 
+
 function showPreview(){
 	preview.style.zIndex = 15;
 	preview.style.visibility = "visible";
@@ -440,6 +444,7 @@ function showShade(){
 function showStyleAttributes(){
 	code = ""
 	attributes_panel.innerHTML = code;
+	attributes_title.innerHTML = "";
 
 }
 

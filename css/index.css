@@ -138,6 +138,11 @@ body{
 	float: left;
 }
 
+.container .right-sidebar > h3{
+	color: #FFF;
+	text-align: center;
+}
+
 .container .right-sidebar > #attributes_panel {
 	overflow-y: scroll;
 	overflow-x: hidden;

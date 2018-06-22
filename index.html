@@ -40,10 +40,17 @@
 			<div class="left-sidebar right-sidebar">
 				<h1  onclick="switchBackgroundColor()">Properties</h1>
 				
-				<br><br>
+				<h3 id="attributes_title"></h3>
 				
 				<div id="attributes_panel">
 
+				</div>
+
+				<input type="text" onkeydown="searchElement()" id="element_search" placeholder="Search for elements here...">
+
+				<h2>Results</h2>
+
+				<div class="search_results" id="search_results">
 				</div>
 			</div>
 
@@ -105,6 +112,7 @@
 			var view = document.getElementById("view");
 			var viewbox = document.getElementById("viewbox");
 			var properties_btn = document.getElementById("properties_btn");
+			var attributes_title= document.getElementById("attributes_title");
 			var attributes_panel = document.getElementById("attributes_panel");
 			
 			var modal = document.getElementById("modal");
