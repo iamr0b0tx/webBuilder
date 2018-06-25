@@ -424,6 +424,14 @@ function showAttributes(){
 		for(basic_attribute in basic_attributes){
 			code += formatInput(ci, basic_attribute, basic_attributes[basic_attribute]);
 		}
+	
+	}else{
+		code = '<div class="right-base-corner">\
+					<input type="text" onkeydown="searchAttribute()" id="attribute_search" placeholder="Search for Attributes here...">\
+					<h2>Results</h2>\
+					<div class="search_results" id="search_results"></div>\
+				</div>'
+		attributes_panel.style.height = "30%";
 	}
 
 	attributes_panel.innerHTML = code;
