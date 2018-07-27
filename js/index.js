@@ -612,7 +612,7 @@ function updateElementId(element){
 	id = element.getAttribute("id").split("_");
 	id = parseInt(id[id.length-1]);
 
-	_layers[id]["attributes"]["id"] = element.value;
+	_layers[id]["attributes"]["id"] = element.value.replace(" ", '_');
 	showLayers();
 }
 

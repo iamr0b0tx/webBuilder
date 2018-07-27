@@ -1,5 +1,7 @@
 .active_layer{
-	outline: auto;
+	outline: none;
+	background: #FFF !important; 
+	color: #333 !important;
 }
 
 .right-base-corner{
