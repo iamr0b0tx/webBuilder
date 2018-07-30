@@ -17,3 +17,13 @@ const PARSE_ATTRIBUTE = {
 }
 
 const PARSE_ATTRIBUTE_R = invert(ATTRIBUTES);
+
+const STYLES = {
+	"background": "color",
+	"color": "color",
+	"font": "string",
+	"height": "distance",
+	"position": "position",
+	"textColor": "color",
+	"width": "distance",
+}

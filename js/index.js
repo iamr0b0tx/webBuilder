@@ -1,4 +1,12 @@
 
+function addClass(element){
+	style = element.getAttribute("id");
+	
+	cc = getCurrentStyle();
+	cc['styles'][style] = null;
+	showStyleAttributesStyles();
+}
+
 function addElement(element){
 	id = element.getAttribute("id");
 	tag = document.createElement(id);
@@ -19,7 +27,6 @@ function addElement(element){
 	updateLayer(0, "childNode", index);
 	
 	code = tag.outerHTML;
-	print(code);
 
 	setCurrentLayer(index);
 }
@@ -35,7 +42,10 @@ function createClass(){
 
 	cls = index.toString();
 	_css_classes[cls] = new Object();
-	_current_css_class = cls;
+	_css_classes[cls]['name'] = index.toString();
+	_css_classes[cls]['styles'] = new Object();
+
+	_current_css_class = index;
 	showStyles();
 	showStyleAttributes();
 }
@@ -61,7 +71,6 @@ function deleteCurrentLayer(){
 
 	LAYERS = Object.keys(_layers);
 	LAYERS = removeFromList(removeFromList(LAYERS, index), 0)
-	print(LAYERS);
 	if(LAYERS.length == 0) setCurrentLayer(0);
 	else {
 		setCurrentLayer(parseInt(LAYERS[0]));
@@ -69,15 +78,21 @@ function deleteCurrentLayer(){
 	}
 }
 
-function formatInput(index, attribute, attribute_type){
+function editClassName(cls_id){
+	cls = _css_classes[cls_id]
+	attributes_title.innerHTML = '<input type="text" style="width:92.5%;text-align:center;" id="class_'+cls_id+'" placeholder="Enter style name" value="'+cls["name"]+'" onchange="updateClassName(this)" onfocusout="resetClassTitle(this)">';
+}
+
+function formatInput(index, current_value, attribute, attribute_type, array="layers"){
 	attr_type = getAttributeType();
-	print("a "+attribute)
 	code = "";
 	if(attribute_type == "distance"){
-		valr = getAttributeValue(_layers[index]["attributes"]["style"], PARSE_ATTRIBUTE[attribute]);
-		
-		val = parseInt(valr).toString()
-		p = valr.replace(val, "");
+		if(current_value == null){
+			current_value = 0;
+		}
+
+		val = parseInt(current_value).toString()
+		p = current_value.replace(val, "");
 		
 		s1 = "";
 		s2 = "";
@@ -88,20 +103,28 @@ function formatInput(index, attribute, attribute_type){
 			s2 = "selected";
 		
 		}
-		code += '<input type="number" style="width:70%;" id="input_'+attribute+"_"+index+'" placeholder="Enter '+attribute+'..." value="'+val+'" onchange="updateElementAttribute(this, \''+attribute+'\', \''+attribute_type+'\')">\
-						<select id="select_'+attribute+"_"+index+'" style="width:20%;" onchange="updateElementAttribute(this, \''+attribute+'\', \''+attribute_type+'\')">\
+		code += '<input type="number" style="width:70%;" id="input_'+attribute+"_"+index+'" placeholder="Enter '+attribute+'..." value="'+val+'" onchange="updateElementAttribute(this, \''+attribute+'\', \''+attribute_type+'\', \''+array+'\')">\
+						<select id="select_'+attribute+"_"+index+'" style="width:20%;" onchange="updateElementAttribute(this, \''+attribute+'\', \''+attribute_type+'\', \''+array+'\')">\
 								<option value="%" '+s1+'>%</option>\
 								<option value="px" '+s2+'>px</option>\
 						</select>';
 	
 	}else if(attribute_type == "color"){
-		code += '<h3 style="">'+attribute+'<input type="color" id="input_'+attribute+"_"+index+'" placeholder="Enter '+attribute+'..." value="'+getAttributeValue(_layers[index]["attributes"]["style"], attribute)+'" style="width:25%;float:right" onchange="updateElementAttribute(this, \''+attribute+'\', \''+attribute_type+'\')"></h3>'
+		if(current_value == null){
+			current_value = "#EEE";
+		}
+		code += '<h3 style="">'+attribute+'<input type="color" id="input_'+attribute+"_"+index+'" placeholder="Enter '+attribute+'..." value="'+current_value+'" style="width:25%;float:right" onchange="updateElementAttribute(this, \''+attribute+'\', \''+attribute_type+'\', \''+array+'\')"></h3>'
 	
 	}else if(attribute_type == "string"){
-		code += '<input type="text" style="width:92.5%;" id="input_'+attribute+"_"+index+'" placeholder="Enter '+attribute+'..." value="'+getAttributeValue(_layers[index]["attributes"]["style"], attribute)+'" onchange="updateElementAttribute(this, \''+attribute+'\', \''+attribute_type+'\', \'id\')">';
+		if(current_value == null){
+			current_value = "";
+		}
+		
+		code += '<input type="text" style="width:92.5%;" id="input_'+attribute+"_"+index+'" placeholder="Enter '+attribute+'..." value="'+current_value+'" onchange="updateElementAttribute(this, \''+attribute+'\', \''+attribute_type+'\', \''+array+'\')">';
 
 	}
 
+	print(code)
 	return code
 }
 
@@ -124,12 +147,10 @@ function getAttributeType(){
 function getAttributeValue(attributes, attribute){
 	li = attributes.split(";");
 	attribute = PARSE_ATTRIBUTE[attribute];
-	print(li)
 	for(ix in li){
 		attr = li[ix];
 		attr = attr.split(":");
 
-		print("attr "+attr+" "+attribute)
 		if(attr[0].trim() == attribute){
 			return attr[1];
 		
@@ -140,6 +161,11 @@ function getAttributeValue(attributes, attribute){
 
 function getCurrentLayer(){
 	return _layers[_current_layer_index];
+}
+
+
+function getCurrentStyle(){
+	return _css_classes[_current_css_class];
 }
 
 function getLayerName(layer){
@@ -168,9 +194,7 @@ function hideShade(){
 function moveCurrentLayer(where){
 	id = _current_layer_index;
 	LAYERS = _layers[_layers[id]["parentNode"]]["childNode"]
-	print(LAYERS)
 	index = LAYERS.indexOf(id);
-	print(index)
 	if(where == "down"){
 		if(index < LAYERS.length - 1) index += 1
 
@@ -179,9 +203,7 @@ function moveCurrentLayer(where){
 		if(index > 0) index -= 1
 	}
 	
-	print(index)
 	_layers[_layers[id]["parentNode"]]["childNode"] = sortLayer(id, index, LAYERS);
-	print(LAYERS)
 	showLayers();
 }
 
@@ -250,13 +272,21 @@ function renderWebpage(){
 				lyr = _layers[layer["childNode"][ix]]
 				child_nodes.push(lyr);
 				print("			adding child node "+layer["childNode"][ix])
-				print($(id));
 				$(id).appendChild(generateHTML(lyr));
 			}
 		}
 	}
 	
 	$("LAYER_"+_current_layer_index).className =  "active_layer";
+}
+
+//returns the class title to display and not input
+function resetClassTitle(element){
+	id = element.getAttribute("id").split("_");
+	updateClassName(element);
+
+	cls = _css_classes[id]
+	attributes_title.innerHTML = cls['name']+' <span onclick="editClassName(\''+id+'\')"> [edit]</span>';
 }
 
 function setAsCurrentLayer(element){
@@ -284,6 +314,22 @@ function setCurrentStyle(index){
 	showStyles();
 }
 
+function searchAttribute(){
+	key = $('style_search').value;
+	search_result = [];
+	code = "";
+
+	for(style in STYLES){
+		re = new RegExp(key, "i");
+		if(style.search(re) != -1){
+			search_result.push(style);
+			code += '<div onclick="addClass(this)" id="'+style+'">'+style+'</div>';
+		}
+	}
+
+	$('style_search_results').innerHTML = code
+}
+
 function searchElement(){
 	key = element_search.value;
 	search_result = [];
@@ -291,7 +337,6 @@ function searchElement(){
 
 	for(element in ELEMENTS){
 		re = new RegExp(key, "i");
-		//print(element+ " "+ key+" "+ ELEMENTS[element]["keywords"].search(re));
 		if(ELEMENTS[element]["keywords"].search(re) != -1){
 			search_result.push(element);
 			code += '<div onclick="addElement(this)" id="'+element+'">'+element+'</div>';
@@ -384,21 +429,16 @@ function showAttributes(){
 			
 			for(index in _layers){
 				p = li.indexOf(parseInt(index));
-				//print(p+ " "+pos)
 				
 				selected = "";
-				//print(li)
-				//print(li.indexOf(parseInt(index))+" "+index)
 				if(index == _current_layer_index || (nodePos[i] != "in" && index == 0)) {
 					continue;
 				}
 
 				layer = _layers[index];
 				layer_name = getLayerName(index);
-				//print(ci+" "+layer_name+" "+rnodePos[i]+" "+layer[rnodePos[i]]);
 				
 				place = rnodePos[i];
-				//print(i+" "+layer["parentNode"]+" "+ci+" "+typeof(ci)+" "+typeof(layer["parentNode"]))
 				if((i == "parentNode" && cl["parentNode"] == index) || ci == layer[place]) selected = "selected";
 				
 				if(p != -1){
@@ -413,25 +453,28 @@ function showAttributes(){
 
 		//collects the id of the element
 		code += '<input type="text" style="width:92.5%;" id="input_id_'+ci+'" placeholder="Enter element id" value="'+_layers[ci]["attributes"]["id"]+'" onchange="updateElementId(this)">';
-		code += '<select style="width:92.5%;" id="select_class_'+ci+'" onchange="updateElementId(this)">\
+		code += '<select style="width:92.5%;" id="select_class_'+ci+'" onchange="updateElementClass(this)">\
 					<option value="">Select a custom css class</option>'
 
-		for(cls in _css_classes){
-			code += '<option value="'+cls+'">'+cls+'</option>'
+		for(cls_id in _css_classes){
+			cls = _css_classes[cls_id]['name']
+			selected = ""
+			if(cl['attributes']['class'] == cls) selected = "selected"
+			code += '<option value="'+cls+'" '+selected+'>'+cls+'</option>'
 		}
 		code += '</select>'
 
 		for(basic_attribute in basic_attributes){
-			code += formatInput(ci, basic_attribute, basic_attributes[basic_attribute]);
+			current_value = getAttributeValue(_layers[index]["attributes"]["style"], basic_attribute)
+			code += formatInput(ci, current_value, basic_attribute, basic_attributes[basic_attribute]);
 		}
 	
 	}else{
 		code = '<div class="right-base-corner">\
-					<input type="text" onkeydown="searchAttribute()" id="attribute_search" placeholder="Search for Attributes here...">\
+					<input type="text" onkeydown="searchAttribute()" id="style_search" placeholder="Search for CSS style here...">\
 					<h2>Results</h2>\
-					<div class="search_results" id="search_results"></div>\
+					<div class="search_results" id="style_search_results"></div>\
 				</div>'
-		attributes_panel.style.height = "30%";
 	}
 
 	attributes_panel.innerHTML = code;
@@ -450,10 +493,37 @@ function showShade(){
 }
 
 function showStyleAttributes(){
-	code = ""
-	attributes_panel.innerHTML = code;
-	attributes_title.innerHTML = "";
+	if(Object.keys(_layers).length == 1) return 
 
+	// current css class
+	cc = getCurrentStyle();
+	ci = _current_css_class;
+	
+	attributes_title.innerHTML = cc["name"]+' <span onclick="editClassName(\''+_current_css_class.toString()+'\')"> [edit]</span>';
+
+	code = '<input type="text" onkeydown="searchAttribute()" id="style_search" placeholder="Search for style here...">\
+			<div id="styles">';		
+	code += '</div>\
+			<div class="right-base-corner">\
+				<h2>Results</h2>\
+				<div class="search_results" id="style_search_results"></div>\
+			</div>'	
+	attributes_panel.innerHTML = code;
+	showStyleAttributesStyles();
+
+}
+
+function showStyleAttributesStyles(){
+	code = ""
+	cc = getCurrentStyle();
+	ci = _current_css_class;
+
+	for(style in cc['styles']){
+		current_value = cc['styles'][style]
+		code += formatInput(ci, current_value, style, STYLES[style], "styles");
+	}
+	
+	$('styles').innerHTML = code;
 }
 
 function showStyles(){
@@ -523,7 +593,6 @@ function sortLayer(layer, index, LAYERS){
 function switchBackgroundColor(){
 	_bgci =  (_bgci + 1)%_colors.length;
 	viewbox.style.backgroundColor = _colors[_bgci];
-	//print(viewbox.style.backgroundColor)
 }
 
 function toggleLayersTab(element){
@@ -554,7 +623,7 @@ function toggleProperties(){
 	
 }
 
-function updateElementAttribute(element, attribute, attribute_class){
+function updateElementAttribute(element, attribute, attribute_class, array="layers"){
 	attr_type = getAttributeType();
 
 	//if the other is picked, it will run an update
@@ -566,58 +635,78 @@ function updateElementAttribute(element, attribute, attribute_class){
 	
 	id =  Id[2];
 	val = element.value;
-	print("attr_type "+attribute_class);
+
 	//get the id, then the other option(select) if available
 	if(attribute_class == "distance"){
 		val += $("select_"+Id[1]+"_"+id).value;
 	}
-	index = parseInt(id);
 
-	print(_layers[index])
-	print(PARSE_ATTRIBUTE[attribute])
-	old_attr = _layers[index]["attributes"]["style"];
-	old_attr_li = old_attr.split(";");
-	
-	isIn = false;
-	attrib = "";
-	for(ix in old_attr_li){
-		attr = old_attr_li[ix];
-		if(attr == ""){
-			continue;
+	if(array == "layers"){
+		index = parseInt(id);
+
+		old_attr = _layers[index]["attributes"]["style"];
+		old_attr_li = old_attr.split(";");
+		
+		isIn = false;
+		attrib = "";
+		for(ix in old_attr_li){
+			attr = old_attr_li[ix];
+			if(attr == ""){
+				continue;
+			}
+
+			attr = attr.split(":");
+
+			if(attr[0].trim() == PARSE_ATTRIBUTE[attribute]){
+				attr[1] = val;
+				isIn = true;
+			
+			}
+			attrib += attr[0]+":"+attr[1]+";"
 		}
-
-		attr = attr.split(":");
-
-		print("z "+attr[0].trim()+" "+PARSE_ATTRIBUTE[attribute])
-		if(attr[0].trim() == PARSE_ATTRIBUTE[attribute]){
-			attr[1] = val;
-			isIn = true;
+		
+		if(isIn == false){
+			attrib = old_attr+PARSE_ATTRIBUTE[attribute]+":"+val+";"
 		
 		}
-		attrib += attr[0]+":"+attr[1]+";"
+		_layers[index]["attributes"]["style"] = attrib;
+		showAttributes();
+		renderViewBox();
+	
+	}else{
+		cc = getCurrentStyle();
+		cc['styles'][id] = val;
+
+		showStyleAttributes();
 	}
-	
-	print(isIn)
-	if(isIn == false){
-		attrib = old_attr+PARSE_ATTRIBUTE[attribute]+":"+val+";"
-	
-	}
-	_layers[index]["attributes"]["style"] = attrib;
-	showAttributes();
-	renderViewBox();
-	
+}
+
+// the class attributes title name editing
+function updateClassName(element){
+	id = element.getAttribute("id").split("_");
+	id = parseInt(id[id.length-1]);
+
+	cls = _css_classes[id]
+	cls['name'] = element.value.replace(/ /g, '_');
 }
 
 function updateElementId(element){
 	id = element.getAttribute("id").split("_");
 	id = parseInt(id[id.length-1]);
 
-	_layers[id]["attributes"]["id"] = element.value.replace(" ", '_');
+	_layers[id]["attributes"]["id"] = element.value.replace(/ /g, '_');
+	showLayers();
+}
+
+function updateElementClass(element){
+	id = element.getAttribute("id").split("_");
+	id = parseInt(id[id.length-1]);
+
+	_layers[id]["attributes"]["class"] = element.value.replace(/ /g, '_');
 	showLayers();
 }
 
 function updateLayer(index, key, value){
-	print("index "+index+" "+key+" "+value);
 	if(key == "childNode"){
 		if(value != null){
 			if(_layers[index][key] == null){

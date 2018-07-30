@@ -57,7 +57,7 @@ body{
 
 }
 
-.container .left-sidebar > .search_results{
+.container > .left-sidebar > .search_results{
 	height:30%;
 	overflow-y: scroll;
 }
@@ -66,7 +66,7 @@ body{
 	height: 45%;
 	background: black;
 }
-.container .left-sidebar > .search_results > div{
+.container .left-sidebar > .search_results > div, .right-base-corner > #style_search_results > div{
 	color: #fff;
 	border-bottom:1px solid black;
 	padding: 3%;
@@ -82,7 +82,7 @@ body{
 }
 
 
-.container .left-sidebar > .search_results > div:hover{
+.container .left-sidebar > .search_results > div:hover, .right-base-corner > #style_search_results > div:hover{
 	color: #fff;
 	border:1px solid #fff;
 	cursor: alias;
